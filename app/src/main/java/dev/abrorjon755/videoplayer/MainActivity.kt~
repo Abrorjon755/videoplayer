@@ -1,0 +1,60 @@
+package dev.abrorjon755.videoplayer
+
+import android.app.PictureInPictureParams
+import android.os.Build
+import android.os.Bundle
+import android.view.WindowInsetsController
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
+import androidx.compose.runtime.LaunchedEffect
+import androidx.core.view.WindowCompat
+import dev.abrorjon755.videoplayer.screens.home.HomeScreen
+import dev.abrorjon755.videoplayer.ui.theme.VideoPlayerTheme
+import kotlinx.coroutines.delay
+
+class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.R)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val windowInsetsController: WindowInsetsController = window.insetsController!!
+        windowInsetsController.hide(
+            WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
+        )
+        windowInsetsController.hide(
+            WindowInsetsController.BEHAVIOR_DEFAULT
+        )
+        setContent {
+            VideoPlayerTheme {
+                LaunchedEffect(windowInsetsController.systemBarsBehavior) {
+                    delay(5000)
+                    windowInsetsController.hide(
+                        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE,
+                    )
+                    windowInsetsController.hide(
+                        WindowInsetsController.BEHAVIOR_DEFAULT
+                    )
+                }
+                HomeScreen()
+            }
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        enterPiPMode(this)
+        super.onUserLeaveHint()
+    }
+}
+
+fun enterPiPMode(activity: android.app.Activity?) {
+    activity?.let {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val params = PictureInPictureParams.Builder()
+                .build()
+            it.enterPictureInPictureMode(params)
+        }
+    }
+}
